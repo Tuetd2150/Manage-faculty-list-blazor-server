@@ -1,0 +1,327 @@
+.management-page {
+    --management-page-gap: 20px;
+    --management-card-padding: 20px;
+    --management-card-radius: 10px;
+    --management-border-color: var(--neutral-stroke-divider-rest);
+    --management-header-bg: var(--neutral-layer-2);
+    --management-header-color: var(--neutral-foreground-rest);
+    --management-header-height: 44px;
+    --management-row-height: 44px;
+    --management-cell-padding-x: 14px;
+    --management-cell-padding-y: 5px;
+}
+
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--management-page-gap);
+    margin: 12px 0 var(--management-page-gap);
+}
+
+.page-header h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+}
+
+.page-header p {
+    margin: 0;
+    color: var(--neutral-foreground-hint);
+}
+
+.filter-card {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: auto;
+    padding: var(--management-card-padding);
+    margin: 14px 0 var(--management-page-gap);
+    overflow: visible;
+    border: 1px solid var(--management-border-color);
+    border-radius: var(--management-card-radius);
+    background: var(--neutral-layer-1);
+    box-sizing: border-box;
+}
+
+.filter-grid {
+    display: grid;
+    grid-template-columns:
+        minmax(280px, 2fr)
+        minmax(220px, 1fr)
+        auto
+        auto;
+    gap: 16px;
+    align-items: end;
+}
+
+.faculty-filter {
+    grid-template-columns:
+        minmax(280px, 2fr)
+        minmax(190px, 1fr)
+        minmax(170px, 1fr)
+        auto
+        auto;
+}
+
+.filter-grid > *,
+.filter-field {
+    min-width: 0;
+}
+
+.filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-field fluent-text-field,
+.filter-field fluent-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.filter-field fluent-select::part(control),
+.page-size fluent-select::part(control) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-button {
+    white-space: nowrap;
+}
+
+.grid-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--management-border-color);
+    border-radius: var(--management-card-radius);
+    background: var(--neutral-layer-1);
+}
+
+.grid-scroll {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+}
+
+.management-grid {
+    gap: 0;
+    border-spacing: 0;
+}
+
+.management-grid th,
+.management-grid td {
+    box-sizing: border-box;
+}
+
+.management-grid tbody td {
+    height: var(--management-row-height);
+    min-height: var(--management-row-height);
+    padding:
+        var(--management-cell-padding-y)
+        var(--management-cell-padding-x);
+    vertical-align: middle;
+    align-content: center;
+}
+
+.management-grid th.column-header {
+    height: calc(var(--management-header-height) - 4px);
+    min-height: calc(var(--management-header-height) - 4px);
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--management-header-color);
+    background: var(--management-header-bg);
+    font-weight: 600;
+}
+
+.management-grid th.column-header .col-title {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: var(--management-header-height);
+    min-height: var(--management-header-height);
+    padding: 0 var(--management-cell-padding-x) 4px;
+    box-sizing: border-box;
+}
+
+.management-grid th.column-header .col-title-text {
+    max-width: none;
+    overflow: visible;
+    white-space: nowrap;
+    text-overflow: clip;
+    text-decoration: none;
+}
+
+.management-grid .index-column {
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.management-grid th.index-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--management-header-height);
+    min-height: var(--management-header-height);
+}
+
+.index-header,
+.index-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    box-sizing: border-box;
+    line-height: var(--type-ramp-base-line-height);
+    text-align: center;
+    white-space: nowrap;
+    text-overflow: clip;
+}
+
+.row-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-button {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+}
+
+.danger-action {
+    color: var(--error, #c50f1f);
+}
+
+.empty-state {
+    padding: 32px;
+    color: var(--neutral-foreground-hint);
+    text-align: center;
+}
+
+.pagination {
+    display: grid;
+    grid-template-columns:
+        minmax(max-content, 1fr)
+        minmax(240px, 1fr)
+        minmax(max-content, 1fr);
+    align-items: center;
+    gap: 16px;
+    padding: 14px 16px;
+    border-top: 1px solid var(--management-border-color);
+}
+
+.page-size,
+.page-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.page-size {
+    justify-self: start;
+    white-space: nowrap;
+}
+
+.page-size fluent-select {
+    width: 84px;
+    flex: 0 0 84px;
+}
+
+.page-summary {
+    justify-self: center;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.page-buttons {
+    justify-self: end;
+}
+
+.pagination-icon-button {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    padding: 0;
+}
+
+@media (max-width: 1400px) and (min-width: 768px) {
+    .faculty-filter {
+        grid-template-columns:
+            minmax(260px, 2fr)
+            minmax(190px, 1fr)
+            minmax(170px, 1fr);
+    }
+
+    .faculty-filter .filter-button {
+        width: max-content;
+        justify-self: start;
+    }
+}
+
+@media (max-width: 1050px) {
+    .filter-grid,
+    .faculty-filter {
+        grid-template-columns:
+            minmax(260px, 2fr)
+            minmax(180px, 1fr)
+            minmax(160px, 1fr);
+    }
+
+    .filter-button {
+        justify-self: start;
+    }
+}
+
+@media (max-width: 767px) {
+    .page-header {
+        flex-direction: column;
+    }
+
+    .filter-grid,
+    .faculty-filter {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-button {
+        width: 100%;
+    }
+
+    .pagination {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .page-size,
+    .page-summary,
+    .page-buttons {
+        justify-self: stretch;
+    }
+
+    .page-buttons {
+        justify-content: flex-end;
+    }
+}

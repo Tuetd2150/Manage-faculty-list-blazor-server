@@ -1,0 +1,18 @@
+﻿<FluentBadge Appearance="@Appearance">
+    @Text
+</FluentBadge>
+
+@code {
+    [Parameter]
+    public ApprovalStatus Status { get; set; }
+
+    private Appearance Appearance =>
+        Status == ApprovalStatus.Approved
+            ? Appearance.Accent
+            : Appearance.Neutral;
+
+    private string Text =>
+        Status == ApprovalStatus.Approved
+            ? "Đã duyệt"
+            : "Chưa duyệt";
+}

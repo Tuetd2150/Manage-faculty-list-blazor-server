@@ -1,0 +1,72 @@
+# =========================
+# .NET / Blazor
+# =========================
+
+# Build output
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# Visual Studio temporary/cache files
+*.cache
+*.tmp
+*.temp
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+*.DotSettings.user
+_ReSharper*/
+
+# =========================
+# NuGet / generated files
+# =========================
+
+artifacts/
+TestResults/
+*.nupkg
+*.snupkg
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+Logs/
+
+# =========================
+# Environment / secrets
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+# OS files
+# =========================
+
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# =========================
+# Coverage
+# =========================
+
+coverage/
+.coverage
+.coverage.*

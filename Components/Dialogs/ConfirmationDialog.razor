@@ -1,0 +1,54 @@
+﻿@if (IsOpen)
+{
+    <FluentDialog
+        Hidden="false"
+        Modal="true"
+        TrapFocus="true"
+        AriaLabel="@Title">
+        <FluentDialogHeader ShowDismiss="false">
+            @Title
+        </FluentDialogHeader>
+        <FluentDialogBody>
+            <p>@Message</p>
+            <div class="confirm-actions">
+                <FluentButton
+                    Appearance="Appearance.Accent"
+                    @onclick="ConfirmAsync">
+                    Xác nhận
+                </FluentButton>
+                <FluentButton
+                    Appearance="Appearance.Neutral"
+                    @onclick="CancelAsync">
+                    Hủy
+                </FluentButton>
+            </div>
+        </FluentDialogBody>
+    </FluentDialog>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter]
+    public string Title { get; set; } = "Xác nhận";
+
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback OnConfirm { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private Task ConfirmAsync()
+    {
+        return OnConfirm.InvokeAsync();
+    }
+
+    private Task CancelAsync()
+    {
+        return OnCancel.InvokeAsync();
+    }
+}

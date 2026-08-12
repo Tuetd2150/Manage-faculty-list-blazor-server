@@ -1,0 +1,22 @@
+﻿.management-page {
+    --coefficient-action-width: 220px;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.coefficient-grid {
+    --coefficient-columns:
+        64px
+        minmax(130px, 1fr)
+        minmax(140px, 1fr)
+        minmax(190px, 1.4fr)
+        minmax(140px, 1fr)
+        var(--coefficient-action-width);
+    width: 100%;
+    min-width: 884px;
+    max-width: none;
+    inline-size: 100%;
+    grid-template-columns: var(--coefficient-columns);
+}

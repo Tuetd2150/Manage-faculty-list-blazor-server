@@ -1,0 +1,57 @@
+﻿<div class="navmenu">
+    <input
+        id="navmenu-toggle"
+        class="navmenu-icon"
+        type="checkbox"
+        title="Menu expand/collapse toggle" />
+    <label for="navmenu-toggle" class="navmenu-icon">
+        <FluentIcon
+            Value="@(new Icons.Regular.Size20.Navigation())"
+            Color="Color.Fill" />
+    </label>
+    <nav class="sitenav" aria-labelledby="main-menu">
+        <FluentNavMenu
+            Id="main-menu"
+            Width="250"
+            Collapsible="true"
+            Title="Navigation menu"
+            @bind-Expanded="expanded"
+            CustomToggle="true">
+            <FluentNavLink
+                Href="/"
+                Match="NavLinkMatch.All"
+                Icon="@(new Icons.Regular.Size20.Home())"
+                IconColor="Color.Accent">
+                Home
+            </FluentNavLink>
+            <FluentNavLink
+                Href="counter"
+                Icon="@(new Icons.Regular.Size20.NumberSymbolSquare())"
+                IconColor="Color.Accent">
+                Counter
+            </FluentNavLink>
+            <FluentNavLink
+                Href="weather"
+                Icon="@(new Icons.Regular.Size20.WeatherPartlyCloudyDay())"
+                IconColor="Color.Accent">
+                Weather
+            </FluentNavLink>
+            <FluentNavLink
+                Href="lecturer-coefficients"
+                Icon="@(new Icons.Regular.Size20.Calculator())"
+                IconColor="Color.Accent">
+                Quản lý hệ số giảng viên
+            </FluentNavLink>
+            <FluentNavLink
+                Href="faculty-list"
+                Icon="@(new Icons.Regular.Size20.PeopleTeam())"
+                IconColor="Color.Accent">
+                Quản lý giảng viên
+            </FluentNavLink>
+        </FluentNavMenu>
+    </nav>
+</div>
+
+@code {
+    private bool expanded = true;
+}

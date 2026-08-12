@@ -1,0 +1,217 @@
+﻿@page "/lecturer-coefficients"
+
+<PageTitle>Quản lý danh mục hệ số giảng viên</PageTitle>
+
+<div class="management-page">
+    <div class="page-header">
+        <div>
+            <h1>Quản lý danh mục hệ số giảng viên</h1>
+            <p>Quản lý bậc lương, hệ số lương, mức lương và trạng thái phê duyệt.</p>
+        </div>
+        <FluentButton
+            Appearance="Appearance.Accent"
+            IconStart="@(new Icons.Regular.Size20.Add())"
+            @onclick="OpenCreateDialog">
+            Thêm mới
+        </FluentButton>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(notification))
+    {
+        <FluentMessageBar Intent="@notificationIntent">
+            @notification
+        </FluentMessageBar>
+    }
+
+    <div class="filter-card">
+        <div class="filter-grid">
+            <div class="filter-field keyword-filter">
+                <FluentTextField
+                    Label="Từ khóa"
+                    Placeholder="Bậc, hệ số hoặc mức lương"
+                    Immediate="true"
+                    @bind-Value="keywordInput"
+                    @onkeyup="HandleKeywordKeyUp" />
+            </div>
+            <div class="filter-field">
+                <label>Trạng thái duyệt</label>
+                <FluentSelect
+                    TOption="SelectOption"
+                    Items="@statusOptions"
+                    OptionText="@(option => option.Text)"
+                    OptionValue="@(option => option.Value)"
+                    @bind-SelectedOption="statusInput" />
+            </div>
+            <FluentButton
+                Class="filter-button"
+                Appearance="Appearance.Accent"
+                IconStart="@(new Icons.Regular.Size20.Search())"
+                Type="ButtonType.Button"
+                @onclick="ApplyFiltersAsync">
+                Tìm kiếm
+            </FluentButton>
+            <FluentButton
+                Class="filter-button"
+                Appearance="Appearance.Neutral"
+                IconStart="@(new Icons.Regular.Size20.ArrowReset())"
+                Type="ButtonType.Button"
+                @onclick="ResetFilters">
+                Làm mới
+            </FluentButton>
+        </div>
+    </div>
+
+    <div class="grid-card">
+        <div class="grid-scroll">
+            <FluentDataGrid
+                Items="@pagedItems.AsQueryable()"
+                TGridItem="LecturerCoefficient"
+                Class="management-grid coefficient-grid"
+                ResizableColumns="false"
+                GridTemplateColumns="var(--coefficient-columns)">
+                <TemplateColumn
+                    Class="index-column"
+                    Align="Align.Center"
+                    Sortable="false"
+                    Context="item">
+                    <HeaderCellItemTemplate>
+                        <span class="index-header">STT</span>
+                    </HeaderCellItemTemplate>
+                    <ChildContent>
+                        <span class="index-value">@GetRowNumber(item)</span>
+                    </ChildContent>
+                </TemplateColumn>
+                <TemplateColumn Title="Bậc lương" Context="item">
+                    Bậc @item.SalaryGrade
+                </TemplateColumn>
+                <TemplateColumn Title="Hệ số lương" Context="item">
+                    @item.SalaryCoefficient.ToString("0.00")
+                </TemplateColumn>
+                <TemplateColumn Title="Mức lương" Context="item">
+                    @FormatMoney(item.SalaryAmount)
+                </TemplateColumn>
+                <TemplateColumn Title="Trạng thái" Context="item">
+                    <ApprovalStatusBadge Status="@item.ApprovalStatus" />
+                </TemplateColumn>
+                <TemplateColumn Title="Thao tác" Context="item">
+                    <div class="row-actions">
+                        <FluentTooltip Anchor="@($"coefficient-view-{item.Id}")">
+                            Xem chi tiết
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"coefficient-view-{item.Id}")"
+                            Class="action-button"
+                            Appearance="Appearance.Stealth"
+                            Size="ControlSize.Small"
+                            IconStart="@(new Icons.Regular.Size20.Eye())"
+                            AriaLabel="Xem chi tiết"
+                            @onclick="() => OpenDetailDialog(item)" />
+                        <FluentTooltip Anchor="@($"coefficient-edit-{item.Id}")">
+                            Chỉnh sửa
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"coefficient-edit-{item.Id}")"
+                            Class="action-button"
+                            Appearance="Appearance.Stealth"
+                            Size="ControlSize.Small"
+                            IconStart="@(new Icons.Regular.Size20.Edit())"
+                            AriaLabel="Chỉnh sửa"
+                            @onclick="() => OpenEditDialog(item)" />
+                        <FluentTooltip Anchor="@($"coefficient-delete-{item.Id}")">
+                            Xóa
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"coefficient-delete-{item.Id}")"
+                            Class="action-button danger-action"
+                            Appearance="Appearance.Stealth"
+                            Size="ControlSize.Small"
+                            IconStart="@(new Icons.Regular.Size20.Delete())"
+                            AriaLabel="Xóa"
+                            @onclick="() => AskToDelete(item)" />
+                        @if (item.ApprovalStatus == ApprovalStatus.Pending)
+                        {
+                            <FluentTooltip Anchor="@($"coefficient-approval-{item.Id}")">
+                                Duyệt
+                            </FluentTooltip>
+                            <FluentButton
+                                Id="@($"coefficient-approval-{item.Id}")"
+                                Class="action-button"
+                                Appearance="Appearance.Stealth"
+                                Size="ControlSize.Small"
+                                IconStart="@(new Icons.Regular.Size20.CheckmarkCircle())"
+                                AriaLabel="Duyệt"
+                                @onclick="() => AskToChangeApproval(item)" />
+                        }
+                        else
+                        {
+                            <FluentTooltip Anchor="@($"coefficient-approval-{item.Id}")">
+                                Hủy duyệt
+                            </FluentTooltip>
+                            <FluentButton
+                                Id="@($"coefficient-approval-{item.Id}")"
+                                Class="action-button danger-action"
+                                Appearance="Appearance.Stealth"
+                                Size="ControlSize.Small"
+                                IconStart="@(new Icons.Regular.Size20.DismissCircle())"
+                                AriaLabel="Hủy duyệt"
+                                @onclick="() => AskToChangeApproval(item)" />
+                        }
+                    </div>
+                </TemplateColumn>
+            </FluentDataGrid>
+        </div>
+
+        @if (filteredItems.Count == 0)
+        {
+            <div class="empty-state">Không tìm thấy hệ số phù hợp.</div>
+        }
+
+        <div class="pagination">
+            <div class="page-size">
+                <label>Số dòng/trang</label>
+                <FluentSelect
+                    TOption="SelectOption"
+                    Items="@pageSizeOptions"
+                    OptionText="@(option => option.Text)"
+                    OptionValue="@(option => option.Value)"
+                    @bind-SelectedOption="selectedPageSize"
+                    @bind-SelectedOption:after="ChangePageSize" />
+            </div>
+            <span class="page-summary">
+                Trang @currentPage / @TotalPages · Tổng @filteredItems.Count bản ghi
+            </span>
+            <div class="page-buttons">
+                <FluentButton
+                    Class="pagination-icon-button"
+                    Size="ControlSize.Small"
+                    IconStart="@(new Icons.Regular.Size20.ChevronLeft())"
+                    AriaLabel="Trang trước"
+                    Disabled="@(currentPage == 1)"
+                    @onclick="GoToPreviousPage" />
+                <FluentButton
+                    Class="pagination-icon-button"
+                    Size="ControlSize.Small"
+                    IconStart="@(new Icons.Regular.Size20.ChevronRight())"
+                    AriaLabel="Trang sau"
+                    Disabled="@(currentPage == TotalPages)"
+                    @onclick="GoToNextPage" />
+            </div>
+        </div>
+    </div>
+
+    <LecturerCoefficientDialog
+        IsOpen="@coefficientDialogOpen"
+        Mode="@dialogMode"
+        Model="@selectedCoefficient"
+        SalaryGradeOptions="@CoefficientService.GetSalaryGradeDefaults()"
+        IsDuplicate="@CoefficientService.CheckDuplicate"
+        OnSave="SaveCoefficient"
+        OnCancel="CloseCoefficientDialog" />
+
+    <ConfirmationDialog
+        IsOpen="@confirmationDialogOpen"
+        Title="@confirmationTitle"
+        Message="@confirmationMessage"
+        OnConfirm="ConfirmPendingAction"
+        OnCancel="CloseConfirmation" />
+</div>

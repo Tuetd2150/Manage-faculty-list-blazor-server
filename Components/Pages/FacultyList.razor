@@ -1,0 +1,256 @@
+﻿@page "/faculty-list"
+
+<PageTitle>Quản lý danh sách giảng viên</PageTitle>
+
+<div class="management-page">
+    <div class="page-header">
+        <div>
+            <h1>Quản lý danh sách giảng viên</h1>
+            <p>Quản lý hồ sơ, học hàm, học vị và trạng thái duyệt của giảng viên.</p>
+        </div>
+        <FluentButton
+            Appearance="Appearance.Accent"
+            IconStart="@(new Icons.Regular.Size20.Add())"
+            @onclick="OpenCreateDialog">
+            Thêm mới
+        </FluentButton>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(notification))
+    {
+        <FluentMessageBar Intent="MessageIntent.Success">
+            @notification
+        </FluentMessageBar>
+    }
+
+    <div class="filter-card">
+        <div class="filter-grid faculty-filter">
+            <div class="filter-field keyword-filter">
+                <FluentTextField
+                    Label="Từ khóa"
+                    Placeholder="Họ tên, số điện thoại hoặc email"
+                    Immediate="true"
+                    @bind-Value="keywordInput"
+                    @onkeyup="HandleKeywordKeyUp" />
+            </div>
+            <div class="filter-field">
+                <label>Trạng thái duyệt</label>
+                <FluentSelect
+                    TOption="SelectOption"
+                    Items="@statusOptions"
+                    OptionText="@(option => option.Text)"
+                    OptionValue="@(option => option.Value)"
+                    Position="SelectPosition.Below"
+                    @bind-SelectedOption="statusInput" />
+            </div>
+            <div class="filter-field">
+                <label>Học vị</label>
+                <FluentSelect
+                    TOption="SelectOption"
+                    Items="@DegreeOptions"
+                    OptionText="@(option => option.Text)"
+                    OptionValue="@(option => option.Value)"
+                    Position="SelectPosition.Below"
+                    @bind-SelectedOption="degreeInput" />
+            </div>
+            <FluentButton
+                Class="filter-button"
+                Appearance="Appearance.Accent"
+                IconStart="@(new Icons.Regular.Size20.Search())"
+                Type="ButtonType.Button"
+                @onclick="ApplyFiltersAsync">
+                Tìm kiếm
+            </FluentButton>
+            <FluentButton
+                Class="filter-button"
+                Appearance="Appearance.Neutral"
+                IconStart="@(new Icons.Regular.Size20.ArrowReset())"
+                Type="ButtonType.Button"
+                @onclick="ResetFilters">
+                Làm mới
+            </FluentButton>
+        </div>
+    </div>
+
+    <div class="grid-card">
+        <div class="grid-scroll">
+            <FluentDataGrid
+                Items="@pagedItems.AsQueryable()"
+                TGridItem="FacultyMember"
+                Class="management-grid faculty-grid"
+                ResizableColumns="false"
+                GridTemplateColumns="var(--faculty-columns)">
+                <TemplateColumn
+                    Class="index-column"
+                    Align="Align.Center"
+                    Sortable="false"
+                    Context="item">
+                    <HeaderCellItemTemplate>
+                        <span class="index-header">STT</span>
+                    </HeaderCellItemTemplate>
+                    <ChildContent>
+                        <span class="index-value">@GetRowNumber(item)</span>
+                    </ChildContent>
+                </TemplateColumn>
+                <PropertyColumn
+                    Title="Họ và tên"
+                    Property="@(item => item.FullName)"
+                    Sortable="false" />
+                <PropertyColumn
+                    Title="Số điện thoại"
+                    Property="@(item => item.PhoneNumber)"
+                    Sortable="false" />
+                <TemplateColumn
+                    Title="Ngày sinh"
+                    Sortable="false"
+                    Context="item">
+                    @item.DateOfBirth?.ToString("dd/MM/yyyy")
+                </TemplateColumn>
+                <TemplateColumn Title="Email" Sortable="false" Context="item">
+                    <span class="email-value">@item.Email</span>
+                </TemplateColumn>
+                <TemplateColumn
+                    Title="Hệ số giảng viên"
+                    Sortable="false"
+                    Context="item">
+                    @GetCoefficientDisplay(item.LecturerCoefficientId)
+                </TemplateColumn>
+                <TemplateColumn Title="Học hàm" Sortable="false" Context="item">
+                    @GetAcademicRankDisplay(item.AcademicRankId)
+                </TemplateColumn>
+                <TemplateColumn Title="Học vị" Sortable="false" Context="item">
+                    @GetDegreeDisplay(item.DegreeId)
+                </TemplateColumn>
+                <TemplateColumn
+                    Title="Trạng thái"
+                    Sortable="false"
+                    Context="item">
+                    <ApprovalStatusBadge Status="@item.ApprovalStatus" />
+                </TemplateColumn>
+                <TemplateColumn
+                    Title="Thao tác"
+                    Sortable="false"
+                    Context="item">
+                    <div class="row-actions">
+                        <FluentTooltip Anchor="@($"faculty-view-{item.Id}")">
+                            Xem chi tiết
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"faculty-view-{item.Id}")"
+                            Class="action-button"
+                            Size="ControlSize.Small"
+                            Appearance="Appearance.Stealth"
+                            IconStart="@(new Icons.Regular.Size20.Eye())"
+                            AriaLabel="Xem chi tiết"
+                            @onclick="() => OpenDetailDialog(item)" />
+                        <FluentTooltip Anchor="@($"faculty-edit-{item.Id}")">
+                            Chỉnh sửa
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"faculty-edit-{item.Id}")"
+                            Class="action-button"
+                            Size="ControlSize.Small"
+                            Appearance="Appearance.Stealth"
+                            IconStart="@(new Icons.Regular.Size20.Edit())"
+                            AriaLabel="Chỉnh sửa"
+                            @onclick="() => OpenEditDialog(item)" />
+                        <FluentTooltip Anchor="@($"faculty-delete-{item.Id}")">
+                            Xóa
+                        </FluentTooltip>
+                        <FluentButton
+                            Id="@($"faculty-delete-{item.Id}")"
+                            Class="action-button danger-action"
+                            Size="ControlSize.Small"
+                            Appearance="Appearance.Stealth"
+                            IconStart="@(new Icons.Regular.Size20.Delete())"
+                            AriaLabel="Xóa"
+                            @onclick="() => AskToDelete(item)" />
+                        @if (item.ApprovalStatus == ApprovalStatus.Pending)
+                        {
+                            <FluentTooltip Anchor="@($"faculty-approval-{item.Id}")">
+                                Duyệt giảng viên
+                            </FluentTooltip>
+                            <FluentButton
+                                Id="@($"faculty-approval-{item.Id}")"
+                                Class="action-button"
+                                Size="ControlSize.Small"
+                                Appearance="Appearance.Stealth"
+                                IconStart="@(new Icons.Regular.Size20.CheckmarkCircle())"
+                                AriaLabel="Duyệt giảng viên"
+                                @onclick="() => AskToChangeApproval(item)" />
+                        }
+                        else
+                        {
+                            <FluentTooltip Anchor="@($"faculty-approval-{item.Id}")">
+                                Hủy duyệt
+                            </FluentTooltip>
+                            <FluentButton
+                                Id="@($"faculty-approval-{item.Id}")"
+                                Class="action-button danger-action"
+                                Size="ControlSize.Small"
+                                Appearance="Appearance.Stealth"
+                                IconStart="@(new Icons.Regular.Size20.DismissCircle())"
+                                AriaLabel="Hủy duyệt"
+                                @onclick="() => AskToChangeApproval(item)" />
+                        }
+                    </div>
+                </TemplateColumn>
+            </FluentDataGrid>
+        </div>
+
+        @if (filteredItems.Count == 0)
+        {
+            <div class="empty-state">Không tìm thấy giảng viên phù hợp.</div>
+        }
+
+        <div class="pagination">
+            <div class="page-size">
+                <label>Số dòng/trang</label>
+                <FluentSelect
+                    TOption="SelectOption"
+                    Items="@pageSizeOptions"
+                    OptionText="@(option => option.Text)"
+                    OptionValue="@(option => option.Value)"
+                    @bind-SelectedOption="selectedPageSize"
+                    @bind-SelectedOption:after="ChangePageSize" />
+            </div>
+            <span class="page-summary">
+                Trang @currentPage / @TotalPages · Tổng @filteredItems.Count bản ghi
+            </span>
+            <div class="page-buttons">
+                <FluentButton
+                    Class="pagination-icon-button"
+                    Size="ControlSize.Small"
+                    IconStart="@(new Icons.Regular.Size20.ChevronLeft())"
+                    AriaLabel="Trang trước"
+                    Disabled="@(currentPage == 1)"
+                    @onclick="GoToPreviousPage" />
+                <FluentButton
+                    Class="pagination-icon-button"
+                    Size="ControlSize.Small"
+                    IconStart="@(new Icons.Regular.Size20.ChevronRight())"
+                    AriaLabel="Trang sau"
+                    Disabled="@(currentPage == TotalPages)"
+                    @onclick="GoToNextPage" />
+            </div>
+        </div>
+    </div>
+
+    <FacultyDialog
+        IsOpen="@facultyDialogOpen"
+        Mode="@dialogMode"
+        Model="@selectedMember"
+        LecturerCoefficients="@CoefficientService.GetAll()"
+        AcademicRanks="@FacultyService.AcademicRanks"
+        Degrees="@FacultyService.Degrees"
+        EmailExists="@FacultyService.CheckDuplicateEmail"
+        OnSave="SaveFacultyMember"
+        OnCancel="CloseFacultyDialog" />
+
+    <ConfirmationDialog
+        IsOpen="@confirmationDialogOpen"
+        Title="@confirmationTitle"
+        Message="@confirmationMessage"
+        OnConfirm="ConfirmPendingAction"
+        OnCancel="CloseConfirmation" />
+</div>

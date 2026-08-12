@@ -1,0 +1,119 @@
+﻿<ManagementDialogLayout IsOpen="@IsOpen" Title="@Title">
+                @if (Mode == DialogMode.Detail)
+                {
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span>Bậc lương</span>
+                            <strong>Bậc @editModel.SalaryGrade</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Hệ số lương</span>
+                            <strong>@editModel.SalaryCoefficient.ToString("0.00")</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Mức lương</span>
+                            <strong>@FormatMoney(editModel.SalaryAmount)</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Trạng thái</span>
+                            <ApprovalStatusBadge Status="@editModel.ApprovalStatus" />
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(editModel.Description))
+                        {
+                            <div class="detail-item detail-wide">
+                                <span>Mô tả</span>
+                                <strong>@editModel.Description</strong>
+                            </div>
+                        }
+                    </div>
+                    <div class="dialog-actions">
+                        <FluentButton
+                            Appearance="Appearance.Accent"
+                            Type="ButtonType.Button"
+                            @onclick="CancelAsync">
+                            Đóng
+                        </FluentButton>
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="@editModel" OnValidSubmit="SaveAsync">
+                        <DataAnnotationsValidator />
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label>Bậc lương *</label>
+                                <FluentSelect
+                                    TOption="int"
+                                    Items="@SalaryGrades"
+                                    OptionText="@(grade => $"Bậc {grade}")"
+                                    OptionValue="@(grade => grade.ToString())"
+                                    Position="SelectPosition.Below"
+                                    @bind-SelectedOption="editModel.SalaryGrade"
+                                    @bind-SelectedOption:after="UpdateCoefficientForGrade" />
+                                <ValidationMessage For="@(() => editModel.SalaryGrade)" />
+                            </div>
+                            <div class="form-field">
+                                <label>Hệ số lương *</label>
+                                <FluentTextField
+                                    Placeholder="Ví dụ: 2,34"
+                                    Immediate="true"
+                                    @bind-Value="salaryCoefficientInput"
+                                    @bind-Value:after="UpdateSalaryFromCoefficientInput" />
+                                <ValidationMessage For="@(() => editModel.SalaryCoefficient)" />
+                                @if (!string.IsNullOrWhiteSpace(coefficientError))
+                                {
+                                    <div class="validation-message" role="alert">
+                                        @coefficientError
+                                    </div>
+                                }
+                            </div>
+                            <div class="form-field">
+                                <label>Mức lương (VNĐ) *</label>
+                                <FluentNumberField
+                                    HideStep="true"
+                                    Min="1m"
+                                    Step="1m"
+                                    ParsingErrorMessage="Mức lương phải là số nguyên dương."
+                                    @bind-Value="editModel.SalaryAmount" />
+                                <ValidationMessage For="@(() => editModel.SalaryAmount)" />
+                            </div>
+                            <div class="form-field">
+                                <label>Trạng thái duyệt</label>
+                                <FluentSelect
+                                    TOption="ApprovalStatus"
+                                    Items="@statuses"
+                                    OptionText="@(status => GetStatusText(status))"
+                                    OptionValue="@(status => ((int)status).ToString())"
+                                    Position="SelectPosition.Above"
+                                    @bind-SelectedOption="editModel.ApprovalStatus" />
+                            </div>
+                            <div class="form-field detail-wide">
+                                <FluentTextArea
+                                    Label="Mô tả"
+                                    Rows="3"
+                                    @bind-Value="editModel.Description" />
+                                <ValidationMessage For="@(() => editModel.Description)" />
+                            </div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(duplicateError))
+                        {
+                            <div class="validation-message" role="alert">
+                                @duplicateError
+                            </div>
+                        }
+                        <div class="dialog-actions">
+                            <FluentButton
+                                Appearance="Appearance.Accent"
+                                Type="ButtonType.Submit">
+                                Lưu
+                            </FluentButton>
+                            <FluentButton
+                                Appearance="Appearance.Neutral"
+                                Type="ButtonType.Button"
+                                @onclick="CancelAsync">
+                                Hủy
+                            </FluentButton>
+                        </div>
+                    </EditForm>
+                }
+</ManagementDialogLayout>

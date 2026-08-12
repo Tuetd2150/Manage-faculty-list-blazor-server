@@ -1,0 +1,154 @@
+﻿<ManagementDialogLayout
+    IsOpen="@IsOpen"
+    Title="@Title"
+    HostClass="faculty-dialog-host">
+                @if (IsReadOnly)
+                {
+                    <div class="detail-grid">
+                        <div class="detail-item detail-wide">
+                            <span>Họ và tên</span>
+                            <strong>@editModel.FullName</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Số điện thoại</span>
+                            <strong>@editModel.PhoneNumber</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Ngày sinh</span>
+                            <strong>@editModel.DateOfBirth?.ToString("dd/MM/yyyy")</strong>
+                        </div>
+                        <div class="detail-item detail-wide">
+                            <span>Email</span>
+                            <strong>@editModel.Email</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Bậc lương</span>
+                            <strong>
+                                @(selectedCoefficient is null
+                                    ? "—"
+                                    : $"Bậc {selectedCoefficient.SalaryGrade}")
+                            </strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Hệ số lương</span>
+                            <strong>
+                                @(selectedCoefficient?.SalaryCoefficient.ToString("0.00") ?? "—")
+                            </strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Mức lương</span>
+                            <strong>
+                                @(selectedCoefficient is null
+                                    ? "—"
+                                    : FormatMoney(selectedCoefficient.SalaryAmount))
+                            </strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Học hàm</span>
+                            <strong>@AcademicRankDisplay</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Học vị</span>
+                            <strong>@DegreeDisplay</strong>
+                        </div>
+                        <div class="detail-item">
+                            <span>Trạng thái</span>
+                            <ApprovalStatusBadge Status="@editModel.ApprovalStatus" />
+                        </div>
+                    </div>
+                    <div class="dialog-actions">
+                        <FluentButton
+                            Appearance="Appearance.Accent"
+                            Type="ButtonType.Button"
+                            @onclick="CancelAsync">
+                            Đóng
+                        </FluentButton>
+                    </div>
+                }
+                else
+                {
+                    <EditForm Model="@editModel" OnValidSubmit="SaveAsync">
+                        <DataAnnotationsValidator />
+                        <div class="form-grid">
+                            <div class="form-field detail-wide">
+                                <FluentTextField
+                                    Label="Họ và tên *"
+                                    @bind-Value="editModel.FullName" />
+                                <ValidationMessage For="@(() => editModel.FullName)" />
+                            </div>
+                            <div class="form-field">
+                                <FluentTextField
+                                    Label="Số điện thoại *"
+                                    @bind-Value="editModel.PhoneNumber" />
+                                <ValidationMessage For="@(() => editModel.PhoneNumber)" />
+                            </div>
+                            <div class="form-field">
+                                <FluentDatePicker
+                                    Label="Ngày sinh *"
+                                    @bind-Value="editModel.DateOfBirth" />
+                                <ValidationMessage For="@(() => editModel.DateOfBirth)" />
+                            </div>
+                            <div class="form-field detail-wide">
+                                <FluentTextField
+                                    Label="Email *"
+                                    TextFieldType="TextFieldType.Email"
+                                    @bind-Value="editModel.Email" />
+                                <ValidationMessage For="@(() => editModel.Email)" />
+                                @if (!string.IsNullOrWhiteSpace(emailError))
+                                {
+                                    <div class="validation-message">@emailError</div>
+                                }
+                            </div>
+                            <div class="form-field">
+                                <label>Hệ số giảng viên *</label>
+                                <FluentSelect
+                                    TOption="LecturerCoefficient"
+                                    Items="@SelectableCoefficients"
+                                    OptionText="@(item => $"Bậc {item.SalaryGrade} – Hệ số {item.SalaryCoefficient:0.00}")"
+                                    OptionValue="@(item => item.Id.ToString())"
+                                    Placeholder="-- Chọn hệ số --"
+                                    @bind-SelectedOption="selectedCoefficient"
+                                    @bind-SelectedOption:after="SynchronizeCoefficient" />
+                                <ValidationMessage For="@(() => editModel.LecturerCoefficientId)" />
+                            </div>
+                            <div class="form-field">
+                                <label>Học hàm</label>
+                                <FluentSelect
+                                    TOption="AcademicRank"
+                                    Items="@AcademicRankOptions"
+                                    OptionText="@(item => item.Name)"
+                                    OptionValue="@(item => item.Id.ToString())"
+                                    @bind-SelectedOption="selectedAcademicRank"
+                                    @bind-SelectedOption:after="SynchronizeAcademicRank" />
+                            </div>
+                            <div class="form-field">
+                                <label>Học vị</label>
+                                <FluentSelect
+                                    TOption="Degree"
+                                    Items="@DegreeOptions"
+                                    OptionText="@(item => item.Name)"
+                                    OptionValue="@(item => item.Id.ToString())"
+                                    @bind-SelectedOption="selectedDegree"
+                                    @bind-SelectedOption:after="SynchronizeDegree" />
+                            </div>
+                            <div class="form-field">
+                                <label>Trạng thái</label>
+                                <ApprovalStatusBadge Status="@editModel.ApprovalStatus" />
+                            </div>
+                        </div>
+                        <div class="dialog-actions">
+                            <FluentButton
+                                Appearance="Appearance.Accent"
+                                Type="ButtonType.Submit">
+                                Lưu
+                            </FluentButton>
+                            <FluentButton
+                                Appearance="Appearance.Neutral"
+                                Type="ButtonType.Button"
+                                @onclick="CancelAsync">
+                                Hủy
+                            </FluentButton>
+                        </div>
+                    </EditForm>
+                }
+</ManagementDialogLayout>

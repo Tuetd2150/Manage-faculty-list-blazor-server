@@ -1,0 +1,11 @@
+﻿.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+}
+
+p {
+    max-width: 440px;
+    line-height: 1.5;
+}

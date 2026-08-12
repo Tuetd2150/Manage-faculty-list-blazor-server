@@ -1,0 +1,51 @@
+﻿.navmenu-icon {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    nav.sitenav,
+    .navmenu {
+        width: 100%;
+    }
+
+    nav.sitenav {
+        height: 100%;
+    }
+
+    ::deep #main-menu {
+        width: 100% !important;
+    }
+
+    ::deep #main-menu > div:first-child:is(.expander) {
+        display: none;
+    }
+
+    #navmenu-toggle {
+        appearance: none;
+    }
+
+    #navmenu-toggle ~ nav {
+        display: none;
+    }
+
+    #navmenu-toggle:checked ~ nav {
+        display: block;
+    }
+
+    .navmenu-icon {
+        position: absolute;
+        z-index: 10;
+        top: 15px;
+        right: 20px;
+        display: block;
+        width: 20px;
+        height: 20px;
+        border: 0;
+        cursor: pointer;
+    }
+
+    [dir="rtl"] .navmenu-icon {
+        right: auto;
+        left: 20px;
+    }
+}

@@ -1,0 +1,32 @@
+﻿@if (IsOpen)
+{
+    <div class="management-dialog-host @HostClass">
+        <FluentDialog
+            Class="management-dialog"
+            Hidden="false"
+            Modal="true"
+            TrapFocus="true"
+            AriaLabel="@Title">
+            <FluentDialogHeader ShowDismiss="false">
+                @Title
+            </FluentDialogHeader>
+            <FluentDialogBody>
+                @ChildContent
+            </FluentDialogBody>
+        </FluentDialog>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsOpen { get; set; }
+
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? HostClass { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -1,0 +1,40 @@
+﻿.management-page {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.management-page ::deep table.faculty-grid {
+    --faculty-columns: 64px 210px 160px 140px 300px 230px 170px 140px 140px 220px;
+    width: 1774px;
+    min-width: 1774px;
+    max-width: none;
+    inline-size: 1774px;
+    min-inline-size: 1774px;
+    grid-template-columns: var(--faculty-columns);
+}
+
+.management-page ::deep .faculty-grid th,
+.management-page ::deep .faculty-grid td {
+    min-width: 0 !important;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.email-value {
+    display: inline-block;
+    width: max-content;
+    max-width: none;
+    white-space: nowrap;
+    overflow: visible;
+    text-overflow: clip;
+}
+
+.row-actions {
+    width: max-content;
+    min-width: max-content;
+    overflow: visible;
+}
