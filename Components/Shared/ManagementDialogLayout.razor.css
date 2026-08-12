@@ -146,13 +146,10 @@
 }
 
 .management-dialog-host ::deep .dialog-actions {
-    display: flex;
     width: 100%;
     min-width: 0;
     max-width: 100%;
     flex: 0 0 auto;
-    justify-content: flex-end;
-    gap: 10px;
     margin-top: var(--management-dialog-gap);
     padding-top: var(--management-dialog-gap);
     border-top: 1px solid var(--management-border-color);

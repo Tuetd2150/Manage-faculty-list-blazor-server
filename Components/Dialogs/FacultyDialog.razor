@@ -56,14 +56,17 @@
                             <ApprovalStatusBadge Status="@editModel.ApprovalStatus" />
                         </div>
                     </div>
-                    <div class="dialog-actions">
+                    <FluentStack
+                        Class="dialog-actions"
+                        HorizontalAlignment="HorizontalAlignment.End"
+                        HorizontalGap="10">
                         <FluentButton
                             Appearance="Appearance.Accent"
                             Type="ButtonType.Button"
                             @onclick="CancelAsync">
                             Đóng
                         </FluentButton>
-                    </div>
+                    </FluentStack>
                 }
                 else
                 {
@@ -136,7 +139,10 @@
                                 <ApprovalStatusBadge Status="@editModel.ApprovalStatus" />
                             </div>
                         </div>
-                        <div class="dialog-actions">
+                        <FluentStack
+                            Class="dialog-actions"
+                            HorizontalAlignment="HorizontalAlignment.End"
+                            HorizontalGap="10">
                             <FluentButton
                                 Appearance="Appearance.Accent"
                                 Type="ButtonType.Submit">
@@ -148,7 +154,7 @@
                                 @onclick="CancelAsync">
                                 Hủy
                             </FluentButton>
-                        </div>
+                        </FluentStack>
                     </EditForm>
                 }
 </ManagementDialogLayout>

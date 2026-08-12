@@ -10,7 +10,10 @@
         </FluentDialogHeader>
         <FluentDialogBody>
             <p>@Message</p>
-            <div class="confirm-actions">
+            <FluentStack
+                Class="confirm-actions"
+                HorizontalAlignment="HorizontalAlignment.End"
+                HorizontalGap="8">
                 <FluentButton
                     Appearance="Appearance.Accent"
                     @onclick="ConfirmAsync">
@@ -21,7 +24,7 @@
                     @onclick="CancelAsync">
                     Hủy
                 </FluentButton>
-            </div>
+            </FluentStack>
         </FluentDialogBody>
     </FluentDialog>
 }
