@@ -3,6 +3,8 @@ using Manage_falcuty_list_task02.Models;
 using Manage_falcuty_list_task02.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using System.Globalization;
+using System.Text;
 
 namespace Manage_falcuty_list_task02.Components.Pages;
 
@@ -83,22 +85,20 @@ public partial class FacultyList
         ApplyCurrentFilters();
     }
 
-    private Task ApplyFiltersAsync()
+    private void ApplyFilters()
     {
         appliedKeyword = keywordInput.Trim();
         appliedStatus = statusInput;
         appliedDegree = degreeInput;
         currentPage = 1;
         ApplyCurrentFilters();
-
-        return Task.CompletedTask;
     }
 
-    private async Task HandleKeywordKeyUp(KeyboardEventArgs eventArgs)
+    private void HandleKeywordKeyUp(KeyboardEventArgs eventArgs)
     {
         if (eventArgs.Key == "Enter")
         {
-            await ApplyFiltersAsync();
+            ApplyFilters();
         }
     }
 
@@ -108,16 +108,7 @@ public partial class FacultyList
 
         if (!string.IsNullOrWhiteSpace(appliedKeyword))
         {
-            query = query.Where(item =>
-                item.FullName.Contains(
-                    appliedKeyword,
-                    StringComparison.OrdinalIgnoreCase)
-                || item.PhoneNumber.Contains(
-                    appliedKeyword,
-                    StringComparison.OrdinalIgnoreCase)
-                || item.Email.Contains(
-                    appliedKeyword,
-                    StringComparison.OrdinalIgnoreCase));
+            query = query.Where(item => MatchesKeyword(item, appliedKeyword));
         }
 
         if (Enum.TryParse(appliedStatus.Value, out ApprovalStatus status))
@@ -133,6 +124,102 @@ public partial class FacultyList
         filteredItems = query.ToList();
         currentPage = Math.Min(currentPage, TotalPages);
         UpdatePage();
+    }
+
+    private static bool MatchesKeyword(FacultyMember member, string keyword)
+    {
+        return MatchesName(member.FullName, keyword)
+            || MatchesPhone(member.PhoneNumber, keyword)
+            || MatchesEmail(member.Email, keyword);
+    }
+
+    private static bool MatchesName(string fullName, string keyword)
+    {
+        string normalizedName = NormalizeSearchText(fullName);
+        string normalizedKeyword = NormalizeSearchText(keyword);
+        string[] keywordParts = normalizedKeyword.Split(
+            ' ',
+            StringSplitOptions.RemoveEmptyEntries);
+
+        return keywordParts.Length > 0
+            && keywordParts.All(part =>
+                normalizedName.Contains(part, StringComparison.Ordinal));
+    }
+
+    private static bool MatchesPhone(string phoneNumber, string keyword)
+    {
+        if (!IsPhoneLikeKeyword(keyword))
+        {
+            return false;
+        }
+
+        string normalizedKeyword = DigitsOnly(keyword);
+
+        return normalizedKeyword.Length > 0
+            && DigitsOnly(phoneNumber).Contains(
+                normalizedKeyword,
+                StringComparison.Ordinal);
+    }
+
+    private static bool MatchesEmail(string email, string keyword)
+    {
+        return email.Contains(
+            keyword.Trim(),
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeSearchText(string value)
+    {
+        string decomposed = value
+            .Trim()
+            .ToLowerInvariant()
+            .Replace('\u0111', 'd')
+            .Normalize(NormalizationForm.FormD);
+        StringBuilder normalized = new(decomposed.Length);
+        bool previousWasWhitespace = false;
+
+        foreach (char character in decomposed)
+        {
+            UnicodeCategory category = CharUnicodeInfo.GetUnicodeCategory(character);
+
+            if (category is UnicodeCategory.NonSpacingMark
+                or UnicodeCategory.SpacingCombiningMark
+                or UnicodeCategory.EnclosingMark)
+            {
+                continue;
+            }
+
+            if (char.IsWhiteSpace(character))
+            {
+                if (!previousWasWhitespace && normalized.Length > 0)
+                {
+                    normalized.Append(' ');
+                }
+
+                previousWasWhitespace = true;
+                continue;
+            }
+
+            normalized.Append(character);
+            previousWasWhitespace = false;
+        }
+
+        return normalized.ToString().TrimEnd();
+    }
+
+    private static string DigitsOnly(string value)
+    {
+        return new string(value.Where(char.IsDigit).ToArray());
+    }
+
+    private static bool IsPhoneLikeKeyword(string keyword)
+    {
+        return !string.IsNullOrWhiteSpace(keyword)
+            && keyword.Any(char.IsDigit)
+            && keyword.All(character =>
+                char.IsDigit(character)
+                || char.IsWhiteSpace(character)
+                || character is '+' or '-' or '.' or '(' or ')');
     }
 
     private void UpdatePage()

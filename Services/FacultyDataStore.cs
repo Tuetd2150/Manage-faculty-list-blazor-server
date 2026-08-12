@@ -76,7 +76,7 @@ public sealed class FacultyDataStore
             .Select(index => new FacultyMember
             {
                 Id = index,
-                FullName = $"{familyNames[(index - 1) % 10]} {givenNames[(index * 3 - 1) % 10]}",
+                FullName = $"{familyNames[(index - 1) % familyNames.Length]} {givenNames[((index - 1) / familyNames.Length + ((index - 1) % familyNames.Length) * 3) % givenNames.Length]}",
                 PhoneNumber = $"09{index:00000000}",
                 DateOfBirth = new DateTime(
                     1970 + index % 28,
