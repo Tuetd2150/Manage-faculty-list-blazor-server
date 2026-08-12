@@ -1,8 +1,8 @@
 using System.Globalization;
-using Manage_falcuty_list_task02.Models;
+using Manage_faculty_list_task02.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace Manage_falcuty_list_task02.Components.Dialogs;
+namespace Manage_faculty_list_task02.Components.Dialogs;
 
 public partial class FacultyDialog
 {

@@ -1,6 +1,6 @@
-﻿using Manage_falcuty_list_task02.Models;
+﻿using Manage_faculty_list_task02.Models;
 
-namespace Manage_falcuty_list_task02.Services;
+namespace Manage_faculty_list_task02.Services;
 
 public sealed class FacultyDataStore
 {

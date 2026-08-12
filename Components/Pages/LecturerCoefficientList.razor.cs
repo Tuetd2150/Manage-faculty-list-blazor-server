@@ -1,12 +1,12 @@
 using System.Globalization;
-using Manage_falcuty_list_task02.Components.Dialogs;
-using Manage_falcuty_list_task02.Models;
-using Manage_falcuty_list_task02.Services;
+using Manage_faculty_list_task02.Components.Dialogs;
+using Manage_faculty_list_task02.Models;
+using Manage_faculty_list_task02.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.FluentUI.AspNetCore.Components;
 
-namespace Manage_falcuty_list_task02.Components.Pages;
+namespace Manage_faculty_list_task02.Components.Pages;
 
 public partial class LecturerCoefficientList
 {

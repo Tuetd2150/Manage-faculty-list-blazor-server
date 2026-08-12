@@ -1,4 +1,4 @@
-﻿namespace Manage_falcuty_list_task02.Models;
+﻿namespace Manage_faculty_list_task02.Models;
 
 public sealed class Degree
 {

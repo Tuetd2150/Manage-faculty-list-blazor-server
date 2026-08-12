@@ -1,5 +1,5 @@
-using Manage_falcuty_list_task02.Components;
-using Manage_falcuty_list_task02.Services;
+using Manage_faculty_list_task02.Components;
+using Manage_faculty_list_task02.Services;
 using Microsoft.FluentUI.AspNetCore.Components;
 
 var builder = WebApplication.CreateBuilder(args);
