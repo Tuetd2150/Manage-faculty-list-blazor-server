@@ -69,12 +69,6 @@
     min-width: 0;
 }
 
-.filter-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
 .filter-field fluent-text-field,
 .filter-field fluent-select {
     display: block;
@@ -198,13 +192,6 @@
     text-overflow: clip;
 }
 
-.row-actions {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 6px;
-}
-
 .action-button {
     width: 32px;
     min-width: 32px;
@@ -232,12 +219,6 @@
     gap: 16px;
     padding: 14px 16px;
     border-top: 1px solid var(--management-border-color);
-}
-
-.page-size {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .page-size {

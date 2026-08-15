@@ -25,15 +25,15 @@
 
     <div class="filter-card">
         <div class="filter-grid faculty-filter">
-            <div class="filter-field keyword-filter">
+            <FluentStack Class="filter-field keyword-filter" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <FluentTextField
                     Label="Từ khóa"
                     Placeholder="Họ tên, số điện thoại hoặc email"
                     Immediate="true"
                     @bind-Value="keywordInput"
                     @onkeyup="HandleKeywordKeyUp" />
-            </div>
-            <div class="filter-field">
+            </FluentStack>
+            <FluentStack Class="filter-field" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <label>Trạng thái duyệt</label>
                 <FluentSelect
                     TOption="SelectOption"
@@ -42,8 +42,8 @@
                     OptionValue="@(option => option.Value)"
                     Position="SelectPosition.Below"
                     @bind-SelectedOption="statusInput" />
-            </div>
-            <div class="filter-field">
+            </FluentStack>
+            <FluentStack Class="filter-field" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <label>Học vị</label>
                 <FluentSelect
                     TOption="SelectOption"
@@ -52,7 +52,7 @@
                     OptionValue="@(option => option.Value)"
                     Position="SelectPosition.Below"
                     @bind-SelectedOption="degreeInput" />
-            </div>
+            </FluentStack>
             <FluentButton
                 Class="filter-button"
                 Appearance="Appearance.Accent"
@@ -131,7 +131,12 @@
                     Title="Thao tác"
                     Sortable="false"
                     Context="item">
-                    <div class="row-actions">
+                    <FluentStack
+                        Class="row-actions"
+                        VerticalAlignment="VerticalAlignment.Center"
+                        HorizontalGap="6"
+                        Wrap="false"
+                        Width="auto">
                         <FluentTooltip Anchor="@($"faculty-view-{item.Id}")">
                             Xem chi tiết
                         </FluentTooltip>
@@ -193,7 +198,7 @@
                                 AriaLabel="Hủy duyệt"
                                 @onclick="() => AskToChangeApproval(item)" />
                         }
-                    </div>
+                    </FluentStack>
                 </TemplateColumn>
             </FluentDataGrid>
         </div>
@@ -204,7 +209,11 @@
         }
 
         <div class="pagination">
-            <div class="page-size">
+            <FluentStack
+                Class="page-size"
+                VerticalAlignment="VerticalAlignment.Center"
+                HorizontalGap="8"
+                Width="auto">
                 <label>Số dòng/trang</label>
                 <FluentSelect
                     TOption="SelectOption"
@@ -213,7 +222,7 @@
                     OptionValue="@(option => option.Value)"
                     @bind-SelectedOption="selectedPageSize"
                     @bind-SelectedOption:after="ChangePageSize" />
-            </div>
+            </FluentStack>
             <span class="page-summary">
                 Trang @currentPage / @TotalPages · Tổng @filteredItems.Count bản ghi
             </span>
