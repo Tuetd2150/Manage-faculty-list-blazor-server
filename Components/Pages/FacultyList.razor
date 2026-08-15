@@ -217,7 +217,10 @@
             <span class="page-summary">
                 Trang @currentPage / @TotalPages · Tổng @filteredItems.Count bản ghi
             </span>
-            <div class="page-buttons">
+            <FluentStack
+                HorizontalAlignment="HorizontalAlignment.End"
+                VerticalAlignment="VerticalAlignment.Center"
+                HorizontalGap="8">
                 <FluentButton
                     Class="pagination-icon-button"
                     Size="ControlSize.Small"
@@ -232,7 +235,7 @@
                     AriaLabel="Trang sau"
                     Disabled="@(currentPage == TotalPages)"
                     @onclick="GoToNextPage" />
-            </div>
+            </FluentStack>
         </div>
     </div>
 

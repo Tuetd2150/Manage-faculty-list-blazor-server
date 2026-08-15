@@ -234,8 +234,7 @@
     border-top: 1px solid var(--management-border-color);
 }
 
-.page-size,
-.page-buttons {
+.page-size {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -255,10 +254,6 @@
     justify-self: center;
     text-align: center;
     white-space: nowrap;
-}
-
-.page-buttons {
-    justify-self: end;
 }
 
 .pagination-icon-button {
@@ -316,12 +311,7 @@
     }
 
     .page-size,
-    .page-summary,
-    .page-buttons {
+    .page-summary {
         justify-self: stretch;
-    }
-
-    .page-buttons {
-        justify-content: flex-end;
     }
 }
