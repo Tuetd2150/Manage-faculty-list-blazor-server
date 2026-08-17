@@ -88,6 +88,7 @@
                             <div class="form-field">
                                 <FluentDatePicker
                                     Label="Ngày sinh *"
+                                    Culture="@VietnameseCulture"
                                     @bind-Value="editModel.DateOfBirth" />
                                 <ValidationMessage For="@(() => editModel.DateOfBirth)" />
                             </div>

@@ -6,6 +6,9 @@ namespace Manage_faculty_list_task02.Components.Dialogs;
 
 public partial class FacultyDialog
 {
+    private static readonly CultureInfo VietnameseCulture =
+        CultureInfo.GetCultureInfo("vi-VN");
+
     [Parameter]
     public bool IsOpen { get; set; }
 

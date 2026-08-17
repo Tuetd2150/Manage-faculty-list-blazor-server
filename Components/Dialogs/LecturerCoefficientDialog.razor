@@ -87,7 +87,7 @@
                                     Items="@statuses"
                                     OptionText="@(status => GetStatusText(status))"
                                     OptionValue="@(status => ((int)status).ToString())"
-                                    Position="SelectPosition.Above"
+                                    Position="SelectPosition.Below"
                                     @bind-SelectedOption="editModel.ApprovalStatus" />
                             </div>
                             <div class="form-field detail-wide">
