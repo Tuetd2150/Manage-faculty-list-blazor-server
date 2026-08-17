@@ -29,8 +29,6 @@ public partial class LecturerCoefficientDialog
     [Parameter]
     public EventCallback OnCancel { get; set; }
 
-    private readonly ApprovalStatus[] statuses =
-        Enum.GetValues<ApprovalStatus>();
     private LecturerCoefficient editModel = new();
     private int initializedId = -1;
     private DialogMode initializedMode;
@@ -185,13 +183,6 @@ public partial class LecturerCoefficientDialog
         return amount.ToString(
             "N0",
             CultureInfo.GetCultureInfo("vi-VN")) + " ₫";
-    }
-
-    private static string GetStatusText(ApprovalStatus status)
-    {
-        return status == ApprovalStatus.Approved
-            ? "Đã duyệt"
-            : "Chưa duyệt";
     }
 
     public enum DialogMode

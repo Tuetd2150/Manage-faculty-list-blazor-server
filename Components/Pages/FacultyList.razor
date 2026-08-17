@@ -4,21 +4,24 @@
 
 <div class="management-page">
     <div class="page-header">
-        <div>
+        <div class="page-heading">
             <h1>Quản lý danh sách giảng viên</h1>
             <p>Quản lý hồ sơ, học hàm, học vị và trạng thái duyệt của giảng viên.</p>
         </div>
-        <FluentButton
-            Appearance="Appearance.Accent"
-            IconStart="@(new Icons.Regular.Size20.Add())"
-            @onclick="OpenCreateDialog">
-            Thêm mới
-        </FluentButton>
+        <div class="page-actions">
+            <label class="import-excel-button">
+                Import Excel
+                <InputFile OnChange="ImportExcel" accept=".xlsx" />
+            </label>
+            <FluentButton Appearance="Appearance.Neutral" @onclick="ExportExcel">Export Excel</FluentButton>
+            <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())"
+                @onclick="OpenCreateDialog">Thêm mới</FluentButton>
+        </div>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(notification))
     {
-        <FluentMessageBar Intent="MessageIntent.Success">
+        <FluentMessageBar Intent="@notificationIntent">
             @notification
         </FluentMessageBar>
     }
@@ -35,23 +38,23 @@
             </FluentStack>
             <FluentStack Class="filter-field" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <label>Trạng thái duyệt</label>
-                <FluentSelect
+                <FluentAutocomplete
                     TOption="SelectOption"
-                    Items="@statusOptions"
                     OptionText="@(option => option.Text)"
-                    OptionValue="@(option => option.Value)"
                     Position="SelectPosition.Below"
-                    @bind-SelectedOption="statusInput" />
+                    MaximumSelectedOptions="1"
+                    OnOptionsSearch="SearchStatusOptions"
+                    @bind-SelectedOptions="selectedStatusOptions" />
             </FluentStack>
             <FluentStack Class="filter-field" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <label>Học vị</label>
-                <FluentSelect
+                <FluentAutocomplete
                     TOption="SelectOption"
-                    Items="@DegreeOptions"
                     OptionText="@(option => option.Text)"
-                    OptionValue="@(option => option.Value)"
                     Position="SelectPosition.Below"
-                    @bind-SelectedOption="degreeInput" />
+                    MaximumSelectedOptions="1"
+                    OnOptionsSearch="SearchDegreeOptions"
+                    @bind-SelectedOptions="selectedDegreeOptions" />
             </FluentStack>
             <FluentButton
                 Class="filter-button"
@@ -75,10 +78,14 @@
     <div class="grid-card">
         <div class="grid-scroll">
             <FluentDataGrid
-                Items="@pagedItems.AsQueryable()"
+                Items="@filteredItems.AsQueryable()"
+                Pagination="@pagination"
                 TGridItem="FacultyMember"
                 Class="management-grid faculty-grid"
                 ResizableColumns="false"
+                ShowHover="true"
+                RowClass="@(item => "clickable-row")"
+                OnRowClick="HandleRowClick"
                 GridTemplateColumns="var(--faculty-columns)">
                 <TemplateColumn
                     Class="index-column"
@@ -95,31 +102,17 @@
                 <PropertyColumn
                     Title="Họ và tên"
                     Property="@(item => item.FullName)"
-                    Sortable="false" />
+                    Sortable="true" />
                 <PropertyColumn
                     Title="Số điện thoại"
                     Property="@(item => item.PhoneNumber)"
                     Sortable="false" />
                 <TemplateColumn
-                    Title="Ngày sinh"
-                    Sortable="false"
-                    Context="item">
-                    @item.DateOfBirth?.ToString("dd/MM/yyyy")
-                </TemplateColumn>
-                <TemplateColumn Title="Email" Sortable="false" Context="item">
-                    <span class="email-value">@item.Email</span>
-                </TemplateColumn>
-                <TemplateColumn
                     Title="Hệ số giảng viên"
-                    Sortable="false"
+                    SortBy="@lecturerCoefficientSort"
+                    Sortable="true"
                     Context="item">
                     @GetCoefficientDisplay(item.LecturerCoefficientId)
-                </TemplateColumn>
-                <TemplateColumn Title="Học hàm" Sortable="false" Context="item">
-                    @GetAcademicRankDisplay(item.AcademicRankId)
-                </TemplateColumn>
-                <TemplateColumn Title="Học vị" Sortable="false" Context="item">
-                    @GetDegreeDisplay(item.DegreeId)
                 </TemplateColumn>
                 <TemplateColumn
                     Title="Trạng thái"
@@ -131,47 +124,25 @@
                     Title="Thao tác"
                     Sortable="false"
                     Context="item">
+                    <div @onclick:stopPropagation="true">
                     <FluentStack
                         Class="row-actions"
                         VerticalAlignment="VerticalAlignment.Center"
                         HorizontalGap="6"
                         Wrap="false"
                         Width="auto">
-                        <FluentTooltip Anchor="@($"faculty-view-{item.Id}")">
-                            Xem chi tiết
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"faculty-view-{item.Id}")"
-                            Class="action-button"
-                            Size="ControlSize.Small"
-                            Appearance="Appearance.Stealth"
-                            IconStart="@(new Icons.Regular.Size20.Eye())"
-                            AriaLabel="Xem chi tiết"
-                            @onclick="() => OpenDetailDialog(item)" />
-                        <FluentTooltip Anchor="@($"faculty-edit-{item.Id}")">
-                            Chỉnh sửa
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"faculty-edit-{item.Id}")"
-                            Class="action-button"
-                            Size="ControlSize.Small"
-                            Appearance="Appearance.Stealth"
-                            IconStart="@(new Icons.Regular.Size20.Edit())"
-                            AriaLabel="Chỉnh sửa"
-                            @onclick="() => OpenEditDialog(item)" />
-                        <FluentTooltip Anchor="@($"faculty-delete-{item.Id}")">
-                            Xóa
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"faculty-delete-{item.Id}")"
-                            Class="action-button danger-action"
-                            Size="ControlSize.Small"
-                            Appearance="Appearance.Stealth"
-                            IconStart="@(new Icons.Regular.Size20.Delete())"
-                            AriaLabel="Xóa"
-                            @onclick="() => AskToDelete(item)" />
                         @if (item.ApprovalStatus == ApprovalStatus.Pending)
                         {
+                            <FluentTooltip Anchor="@($"faculty-edit-{item.Id}")">Chỉnh sửa</FluentTooltip>
+                            <FluentButton Id="@($"faculty-edit-{item.Id}")" Class="action-button"
+                                Size="ControlSize.Small" Appearance="Appearance.Stealth"
+                                IconStart="@(new Icons.Regular.Size20.Edit())" AriaLabel="Chỉnh sửa"
+                                @onclick="() => OpenEditDialog(item)" />
+                            <FluentTooltip Anchor="@($"faculty-delete-{item.Id}")">Xóa</FluentTooltip>
+                            <FluentButton Id="@($"faculty-delete-{item.Id}")" Class="action-button danger-action"
+                                Size="ControlSize.Small" Appearance="Appearance.Stealth"
+                                IconStart="@(new Icons.Regular.Size20.Delete())" AriaLabel="Xóa"
+                                @onclick="() => AskToDelete(item)" />
                             <FluentTooltip Anchor="@($"faculty-approval-{item.Id}")">
                                 Duyệt giảng viên
                             </FluentTooltip>
@@ -199,6 +170,7 @@
                                 @onclick="() => AskToChangeApproval(item)" />
                         }
                     </FluentStack>
+                    </div>
                 </TemplateColumn>
             </FluentDataGrid>
         </div>

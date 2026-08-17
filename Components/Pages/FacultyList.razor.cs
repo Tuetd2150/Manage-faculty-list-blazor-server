@@ -3,6 +3,9 @@ using Manage_faculty_list_task02.Models;
 using Manage_faculty_list_task02.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.JSInterop;
 using System.Globalization;
 using System.Text;
 
@@ -15,6 +18,9 @@ public partial class FacultyList
 
     [Inject]
     private LecturerCoefficientService CoefficientService { get; set; } = default!;
+
+    [Inject] private ExcelService ExcelService { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private readonly List<SelectOption> statusOptions =
     [
@@ -32,7 +38,10 @@ public partial class FacultyList
 
     private List<FacultyMember> allItems = [];
     private List<FacultyMember> filteredItems = [];
-    private List<FacultyMember> pagedItems = [];
+    private readonly PaginationState pagination = new() { ItemsPerPage = 10 };
+    private GridSort<FacultyMember> lecturerCoefficientSort =>
+        GridSort<FacultyMember>.ByAscending(item =>
+            GetCoefficientSalaryGrade(item.LecturerCoefficientId));
     private string keywordInput = string.Empty;
     private string appliedKeyword = string.Empty;
     private SelectOption statusInput = new("", "Tất cả trạng thái");
@@ -40,6 +49,8 @@ public partial class FacultyList
     private SelectOption degreeInput = new("", "Tất cả học vị");
     private SelectOption appliedDegree = new("", "Tất cả học vị");
     private SelectOption selectedPageSize = new("10", "10");
+    private IEnumerable<SelectOption> selectedStatusOptions = [];
+    private IEnumerable<SelectOption> selectedDegreeOptions = [];
     private int pageSize = 10;
     private int currentPage = 1;
     private bool facultyDialogOpen;
@@ -50,6 +61,7 @@ public partial class FacultyList
     private string confirmationMessage = string.Empty;
     private Action? pendingAction;
     private string? notification;
+    private MessageIntent notificationIntent = MessageIntent.Success;
 
     private IReadOnlyList<SelectOption> DegreeOptions
     {
@@ -76,6 +88,8 @@ public partial class FacultyList
 
     protected override void OnInitialized()
     {
+        selectedStatusOptions = [statusOptions[0]];
+        selectedDegreeOptions = [DegreeOptions[0]];
         ReloadData();
     }
 
@@ -87,11 +101,25 @@ public partial class FacultyList
 
     private void ApplyFilters()
     {
+        statusInput = selectedStatusOptions.FirstOrDefault() ?? statusOptions[0];
+        degreeInput = selectedDegreeOptions.FirstOrDefault() ?? DegreeOptions[0];
         appliedKeyword = keywordInput.Trim();
         appliedStatus = statusInput;
         appliedDegree = degreeInput;
         currentPage = 1;
         ApplyCurrentFilters();
+    }
+
+    private void SearchStatusOptions(OptionsSearchEventArgs<SelectOption> args)
+    {
+        args.Items = statusOptions.Where(option =>
+            option.Text.Contains(args.Text, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SearchDegreeOptions(OptionsSearchEventArgs<SelectOption> args)
+    {
+        args.Items = DegreeOptions.Where(option =>
+            option.Text.Contains(args.Text, StringComparison.OrdinalIgnoreCase));
     }
 
     private void HandleKeywordKeyUp(KeyboardEventArgs eventArgs)
@@ -224,17 +252,12 @@ public partial class FacultyList
 
     private void UpdatePage()
     {
-        pagedItems = filteredItems
-            .Skip((currentPage - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
+        _ = pagination.SetCurrentPageIndexAsync(currentPage - 1);
     }
 
     private int GetRowNumber(FacultyMember member)
     {
-        return (currentPage - 1) * pageSize
-            + pagedItems.IndexOf(member)
-            + 1;
+        return filteredItems.IndexOf(member) + 1;
     }
 
     private string GetCoefficientDisplay(int coefficientId)
@@ -245,6 +268,12 @@ public partial class FacultyList
         return coefficient is null
             ? "—"
             : $"Bậc {coefficient.SalaryGrade} – Hệ số {coefficient.SalaryCoefficient:0.00}";
+    }
+
+    private int GetCoefficientSalaryGrade(int coefficientId)
+    {
+        return CoefficientService.GetById(coefficientId)?.SalaryGrade
+            ?? int.MaxValue;
     }
 
     private string GetAcademicRankDisplay(int? academicRankId)
@@ -271,33 +300,36 @@ public partial class FacultyList
         appliedStatus = statusOptions[0];
         degreeInput = DegreeOptions[0];
         appliedDegree = DegreeOptions[0];
+        selectedStatusOptions = [statusOptions[0]];
+        selectedDegreeOptions = [DegreeOptions[0]];
         currentPage = 1;
         notification = null;
         ReloadData();
     }
 
-    private void ChangePageSize()
+    private async Task ChangePageSize()
     {
         pageSize = int.Parse(selectedPageSize.Value);
         currentPage = 1;
-        UpdatePage();
+        await pagination.SetItemsPerPageAsync(pageSize);
+        await pagination.SetCurrentPageIndexAsync(0);
     }
 
-    private void GoToPreviousPage()
+    private async Task GoToPreviousPage()
     {
         if (currentPage > 1)
         {
             currentPage--;
-            UpdatePage();
+            await pagination.SetCurrentPageIndexAsync(currentPage - 1);
         }
     }
 
-    private void GoToNextPage()
+    private async Task GoToNextPage()
     {
         if (currentPage < TotalPages)
         {
             currentPage++;
-            UpdatePage();
+            await pagination.SetCurrentPageIndexAsync(currentPage - 1);
         }
     }
 
@@ -325,6 +357,14 @@ public partial class FacultyList
         selectedMember = member.Clone();
         dialogMode = FacultyDialog.FacultyDialogMode.Detail;
         facultyDialogOpen = true;
+    }
+
+    private void HandleRowClick(FluentDataGridRow<FacultyMember> row)
+    {
+        if (row.Item is not null)
+        {
+            OpenDetailDialog(row.Item);
+        }
     }
 
     private void CloseFacultyDialog()
@@ -407,5 +447,48 @@ public partial class FacultyList
     {
         confirmationDialogOpen = false;
         pendingAction = null;
+    }
+
+    private async Task ExportExcel()
+    {
+        byte[] bytes = ExcelService.ExportFaculty(filteredItems, CoefficientService.GetAll(),
+            FacultyService.AcademicRanks, FacultyService.Degrees);
+        await JS.InvokeVoidAsync("excelDownload", $"danh-sach-giang-vien-{DateTime.Now:yyyyMMdd-HHmm}.xlsx",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", Convert.ToBase64String(bytes));
+    }
+
+    private async Task ImportExcel(InputFileChangeEventArgs args)
+    {
+        notification = null;
+        if (!args.File.Name.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowNotification("Vui lòng chọn file Excel định dạng .xlsx.", MessageIntent.Error);
+            return;
+        }
+        if (args.File.Size > ExcelService.MaxImportFileSize)
+        {
+            ShowNotification("File Excel không được vượt quá 10 MB.", MessageIntent.Error);
+            return;
+        }
+        await using Stream stream = args.File.OpenReadStream(
+            ExcelService.MaxImportFileSize);
+        ImportResult<FacultyMember> result = await ExcelService.ImportFacultyAsync(stream,
+            CoefficientService.GetAll(), FacultyService.AcademicRanks, FacultyService.Degrees);
+        if (!result.IsValid)
+        {
+            ShowNotification(string.Join(" ", result.Errors), MessageIntent.Error);
+            return;
+        }
+        (int added, int updated, int skipped) =
+            FacultyService.UpsertImport(result.Items);
+        ShowNotification(
+            $"Import hoàn tất: thêm {added}, cập nhật {updated}, bỏ qua {skipped} giảng viên trùng khớp.");
+        ReloadData();
+    }
+
+    private void ShowNotification(string message, MessageIntent intent = MessageIntent.Success)
+    {
+        notification = message;
+        notificationIntent = intent;
     }
 }

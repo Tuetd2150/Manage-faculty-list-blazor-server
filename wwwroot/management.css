@@ -13,10 +13,16 @@
 
 .page-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
     gap: var(--management-page-gap);
     margin: 12px 0 var(--management-page-gap);
+}
+
+.page-heading {
+    flex: 1 1 520px;
+    min-width: 0;
 }
 
 .page-header h1 {
@@ -70,7 +76,8 @@
 }
 
 .filter-field fluent-text-field,
-.filter-field fluent-select {
+.filter-field fluent-select,
+.filter-field fluent-autocomplete {
     display: block;
     width: 100%;
     min-width: 0;
@@ -78,6 +85,7 @@
 }
 
 .filter-field fluent-select::part(control),
+.filter-field fluent-autocomplete::part(root),
 .page-size fluent-select::part(control) {
     width: 100%;
     min-width: 0;
@@ -115,6 +123,48 @@
 .management-grid {
     gap: 0;
     border-spacing: 0;
+}
+
+.page-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+    .page-header h1,
+    .page-header p {
+        white-space: nowrap;
+    }
+}
+
+.import-excel-button {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    padding: 0 12px;
+    border: 1px solid var(--neutral-stroke-control-rest);
+    border-radius: 4px;
+    background: var(--neutral-fill-stealth-rest);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.import-excel-button:hover {
+    background: var(--neutral-fill-stealth-hover);
+}
+
+.import-excel-button input[type="file"] {
+    display: none;
+}
+
+.management-grid .clickable-row {
+    cursor: pointer;
 }
 
 .management-grid th,
@@ -226,6 +276,56 @@
     white-space: nowrap;
 }
 
+.management-grid th.column-header fluent-button.col-sort-button {
+    display: block;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+    font: inherit;
+}
+
+.management-grid th.column-header .col-title:has(fluent-button.col-sort-button) {
+    padding: 0;
+}
+
+.management-grid th.column-header fluent-button.col-sort-button::part(control),
+.management-grid th.column-header fluent-button.col-sort-button:hover::part(control),
+.management-grid th.column-header fluent-button.col-sort-button:active::part(control) {
+    width: 100%;
+    height: var(--management-header-height);
+    min-height: 0;
+    align-items: center;
+    justify-content: flex-start;
+    margin: 0;
+    padding:
+        0
+        var(--management-cell-padding-x)
+        4px;
+    border: 0;
+    border-radius: 0;
+    box-sizing: border-box;
+    background: transparent;
+    box-shadow: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+}
+
+.management-grid th.column-header fluent-button.col-sort-button::part(content) {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    line-height: var(--type-ramp-base-line-height);
+}
+
 .page-size fluent-select {
     width: 84px;
     flex: 0 0 84px;
@@ -275,6 +375,18 @@
 @media (max-width: 767px) {
     .page-header {
         flex-direction: column;
+    }
+
+    .page-heading,
+    .page-actions {
+        width: 100%;
+    }
+
+    .page-actions {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        margin-left: 0;
+        white-space: normal;
     }
 
     .filter-grid,

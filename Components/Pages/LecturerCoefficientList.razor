@@ -4,16 +4,19 @@
 
 <div class="management-page">
     <div class="page-header">
-        <div>
+        <div class="page-heading">
             <h1>Quản lý danh mục hệ số giảng viên</h1>
             <p>Quản lý bậc lương, hệ số lương, mức lương và trạng thái phê duyệt.</p>
         </div>
-        <FluentButton
-            Appearance="Appearance.Accent"
-            IconStart="@(new Icons.Regular.Size20.Add())"
-            @onclick="OpenCreateDialog">
-            Thêm mới
-        </FluentButton>
+        <div class="page-actions">
+            <label class="import-excel-button">
+                Import Excel
+                <InputFile OnChange="ImportExcel" accept=".xlsx" />
+            </label>
+            <FluentButton Appearance="Appearance.Neutral" @onclick="ExportExcel">Export Excel</FluentButton>
+            <FluentButton Appearance="Appearance.Accent" IconStart="@(new Icons.Regular.Size20.Add())"
+                @onclick="OpenCreateDialog">Thêm mới</FluentButton>
+        </div>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(notification))
@@ -35,12 +38,12 @@
             </FluentStack>
             <FluentStack Class="filter-field" Orientation="Orientation.Vertical" VerticalGap="6" Width="100%">
                 <label>Trạng thái duyệt</label>
-                <FluentSelect
+                <FluentAutocomplete
                     TOption="SelectOption"
-                    Items="@statusOptions"
                     OptionText="@(option => option.Text)"
-                    OptionValue="@(option => option.Value)"
-                    @bind-SelectedOption="statusInput" />
+                    MaximumSelectedOptions="1"
+                    OnOptionsSearch="SearchStatusOptions"
+                    @bind-SelectedOptions="selectedStatusOptions" />
             </FluentStack>
             <FluentButton
                 Class="filter-button"
@@ -64,10 +67,14 @@
     <div class="grid-card">
         <div class="grid-scroll">
             <FluentDataGrid
-                Items="@pagedItems.AsQueryable()"
+                Items="@filteredItems.AsQueryable()"
+                Pagination="@pagination"
                 TGridItem="LecturerCoefficient"
                 Class="management-grid coefficient-grid"
                 ResizableColumns="false"
+                ShowHover="true"
+                RowClass="@(item => "clickable-row")"
+                OnRowClick="HandleRowClick"
                 GridTemplateColumns="var(--coefficient-columns)">
                 <TemplateColumn
                     Class="index-column"
@@ -81,60 +88,38 @@
                         <span class="index-value">@GetRowNumber(item)</span>
                     </ChildContent>
                 </TemplateColumn>
-                <TemplateColumn Title="Bậc lương" Context="item">
+                <TemplateColumn Title="Bậc lương" SortBy="@salaryGradeSort" Context="item">
                     Bậc @item.SalaryGrade
                 </TemplateColumn>
-                <TemplateColumn Title="Hệ số lương" Context="item">
+                <TemplateColumn Title="Hệ số lương" SortBy="@salaryCoefficientSort" Context="item">
                     @item.SalaryCoefficient.ToString("0.00")
                 </TemplateColumn>
-                <TemplateColumn Title="Mức lương" Context="item">
+                <TemplateColumn Title="Mức lương" SortBy="@salaryAmountSort" Context="item">
                     @FormatMoney(item.SalaryAmount)
                 </TemplateColumn>
                 <TemplateColumn Title="Trạng thái" Context="item">
                     <ApprovalStatusBadge Status="@item.ApprovalStatus" />
                 </TemplateColumn>
                 <TemplateColumn Title="Thao tác" Context="item">
+                    <div @onclick:stopPropagation="true">
                     <FluentStack
                         Class="row-actions"
                         VerticalAlignment="VerticalAlignment.Center"
                         HorizontalGap="6"
                         Wrap="false"
                         Width="auto">
-                        <FluentTooltip Anchor="@($"coefficient-view-{item.Id}")">
-                            Xem chi tiết
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"coefficient-view-{item.Id}")"
-                            Class="action-button"
-                            Appearance="Appearance.Stealth"
-                            Size="ControlSize.Small"
-                            IconStart="@(new Icons.Regular.Size20.Eye())"
-                            AriaLabel="Xem chi tiết"
-                            @onclick="() => OpenDetailDialog(item)" />
-                        <FluentTooltip Anchor="@($"coefficient-edit-{item.Id}")">
-                            Chỉnh sửa
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"coefficient-edit-{item.Id}")"
-                            Class="action-button"
-                            Appearance="Appearance.Stealth"
-                            Size="ControlSize.Small"
-                            IconStart="@(new Icons.Regular.Size20.Edit())"
-                            AriaLabel="Chỉnh sửa"
-                            @onclick="() => OpenEditDialog(item)" />
-                        <FluentTooltip Anchor="@($"coefficient-delete-{item.Id}")">
-                            Xóa
-                        </FluentTooltip>
-                        <FluentButton
-                            Id="@($"coefficient-delete-{item.Id}")"
-                            Class="action-button danger-action"
-                            Appearance="Appearance.Stealth"
-                            Size="ControlSize.Small"
-                            IconStart="@(new Icons.Regular.Size20.Delete())"
-                            AriaLabel="Xóa"
-                            @onclick="() => AskToDelete(item)" />
                         @if (item.ApprovalStatus == ApprovalStatus.Pending)
                         {
+                            <FluentTooltip Anchor="@($"coefficient-edit-{item.Id}")">Chỉnh sửa</FluentTooltip>
+                            <FluentButton Id="@($"coefficient-edit-{item.Id}")" Class="action-button"
+                                Appearance="Appearance.Stealth" Size="ControlSize.Small"
+                                IconStart="@(new Icons.Regular.Size20.Edit())" AriaLabel="Chỉnh sửa"
+                                @onclick="() => OpenEditDialog(item)" />
+                            <FluentTooltip Anchor="@($"coefficient-delete-{item.Id}")">Xóa</FluentTooltip>
+                            <FluentButton Id="@($"coefficient-delete-{item.Id}")" Class="action-button danger-action"
+                                Appearance="Appearance.Stealth" Size="ControlSize.Small"
+                                IconStart="@(new Icons.Regular.Size20.Delete())" AriaLabel="Xóa"
+                                @onclick="() => AskToDelete(item)" />
                             <FluentTooltip Anchor="@($"coefficient-approval-{item.Id}")">
                                 Duyệt
                             </FluentTooltip>
@@ -162,6 +147,7 @@
                                 @onclick="() => AskToChangeApproval(item)" />
                         }
                     </FluentStack>
+                    </div>
                 </TemplateColumn>
             </FluentDataGrid>
         </div>

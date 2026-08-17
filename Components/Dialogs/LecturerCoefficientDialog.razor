@@ -80,16 +80,6 @@
                                     @bind-Value="editModel.SalaryAmount" />
                                 <ValidationMessage For="@(() => editModel.SalaryAmount)" />
                             </div>
-                            <div class="form-field">
-                                <label>Trạng thái duyệt</label>
-                                <FluentSelect
-                                    TOption="ApprovalStatus"
-                                    Items="@statuses"
-                                    OptionText="@(status => GetStatusText(status))"
-                                    OptionValue="@(status => ((int)status).ToString())"
-                                    Position="SelectPosition.Below"
-                                    @bind-SelectedOption="editModel.ApprovalStatus" />
-                            </div>
                             <div class="form-field detail-wide">
                                 <FluentTextArea
                                     Label="Mô tả"

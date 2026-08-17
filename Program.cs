@@ -11,6 +11,7 @@ builder.Services.AddFluentUIComponents();
 builder.Services.AddScoped<FacultyDataStore>();
 builder.Services.AddScoped<FacultyService>();
 builder.Services.AddScoped<LecturerCoefficientService>();
+builder.Services.AddScoped<ExcelService>();
 
 var app = builder.Build();
 

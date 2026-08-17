@@ -77,6 +77,67 @@ public sealed class LecturerCoefficientService(FacultyDataStore dataStore)
         }
     }
 
+    public void ReplaceAll(IEnumerable<LecturerCoefficient> coefficients)
+    {
+        dataStore.LecturerCoefficients.Clear();
+        dataStore.LecturerCoefficients.AddRange(
+            coefficients.Select(item => item.Clone()));
+    }
+
+    public (int Added, int Updated, int Skipped) UpsertImport(
+        IEnumerable<LecturerCoefficient> coefficients)
+    {
+        int added = 0;
+        int updated = 0;
+        int skipped = 0;
+
+        foreach (LecturerCoefficient imported in coefficients)
+        {
+            int existingIndex = dataStore.LecturerCoefficients.FindIndex(item =>
+                item.SalaryGrade == imported.SalaryGrade
+                && item.SalaryCoefficient == imported.SalaryCoefficient);
+
+            if (existingIndex < 0)
+            {
+                LecturerCoefficient newCoefficient = imported.Clone();
+                newCoefficient.Id = GetNextId();
+                dataStore.LecturerCoefficients.Add(newCoefficient);
+                added++;
+                continue;
+            }
+
+            LecturerCoefficient existing =
+                dataStore.LecturerCoefficients[existingIndex];
+
+            if (HasSameImportData(existing, imported))
+            {
+                skipped++;
+                continue;
+            }
+
+            LecturerCoefficient updatedCoefficient = imported.Clone();
+            updatedCoefficient.Id = existing.Id;
+            dataStore.LecturerCoefficients[existingIndex] = updatedCoefficient;
+            updated++;
+        }
+
+        return (added, updated, skipped);
+    }
+
+    private static bool HasSameImportData(
+        LecturerCoefficient existing,
+        LecturerCoefficient imported)
+    {
+        return existing.SalaryGrade == imported.SalaryGrade
+            && existing.SalaryCoefficient == imported.SalaryCoefficient
+            && existing.SalaryAmount == imported.SalaryAmount
+            && existing.ApprovalStatus == imported.ApprovalStatus
+            && string.Equals(
+                existing.Description?.Trim() ?? string.Empty,
+                imported.Description?.Trim() ?? string.Empty,
+                StringComparison.Ordinal);
+    }
+
     private bool IsInUse(int id)
     {
         return CountFacultyUsingCoefficient(id) > 0;
