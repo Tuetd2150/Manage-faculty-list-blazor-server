@@ -35,6 +35,7 @@ public partial class LecturerCoefficientDialog
     private string? duplicateError;
     private string salaryCoefficientInput = string.Empty;
     private string? coefficientError;
+    private IEnumerable<int> selectedSalaryGrades = [];
 
     private IEnumerable<int> SalaryGrades =>
         SalaryGradeOptions.Select(item => item.SalaryGrade);
@@ -73,6 +74,7 @@ public partial class LecturerCoefficientDialog
             salaryCoefficientInput = editModel.SalaryCoefficient.ToString(
                 "0.00",
                 CultureInfo.InvariantCulture);
+            selectedSalaryGrades = [editModel.SalaryGrade];
             initializedId = Model.Id;
             initializedMode = Mode;
             duplicateError = null;
@@ -87,6 +89,15 @@ public partial class LecturerCoefficientDialog
 
     private void UpdateCoefficientForGrade()
     {
+        int? selectedGrade = selectedSalaryGrades.Cast<int?>().FirstOrDefault();
+
+        if (selectedGrade is null)
+        {
+            editModel.SalaryGrade = 0;
+            return;
+        }
+
+        editModel.SalaryGrade = selectedGrade.Value;
         LecturerCoefficient? gradeDefault =
             SalaryGradeOptions.FirstOrDefault(
                 item => item.SalaryGrade == editModel.SalaryGrade);
@@ -102,6 +113,13 @@ public partial class LecturerCoefficientDialog
                     CultureInfo.InvariantCulture);
             coefficientError = null;
         }
+    }
+
+    private void SearchSalaryGradeOptions(OptionsSearchEventArgs<int> args)
+    {
+        string searchText = args.Text ?? string.Empty;
+        args.Items = SalaryGrades.Where(grade =>
+            $"Bậc {grade}".Contains(searchText, StringComparison.OrdinalIgnoreCase));
     }
 
     private void UpdateSalaryFromCoefficientInput()

@@ -112,13 +112,7 @@ public partial class LecturerCoefficientList
 
         if (!string.IsNullOrWhiteSpace(appliedKeyword))
         {
-            query = query.Where(item =>
-                item.SalaryGrade.ToString(CultureInfo.CurrentCulture)
-                    .Contains(appliedKeyword, StringComparison.OrdinalIgnoreCase)
-                || item.SalaryCoefficient.ToString(CultureInfo.CurrentCulture)
-                    .Contains(appliedKeyword, StringComparison.OrdinalIgnoreCase)
-                || item.SalaryAmount.ToString(CultureInfo.CurrentCulture)
-                    .Contains(appliedKeyword, StringComparison.OrdinalIgnoreCase));
+            query = query.Where(item => MatchesKeyword(item, appliedKeyword));
         }
 
         string? statusValue = appliedStatus?.Value;
@@ -132,6 +126,29 @@ public partial class LecturerCoefficientList
         filteredItems = query.ToList();
         currentPage = Math.Min(currentPage, TotalPages);
         UpdatePage();
+    }
+
+    private static bool MatchesKeyword(
+        LecturerCoefficient item,
+        string keyword)
+    {
+        return $"Bậc {item.SalaryGrade}".Contains(
+                keyword,
+                StringComparison.OrdinalIgnoreCase)
+            || item.SalaryGrade.ToString(CultureInfo.CurrentCulture).Contains(
+                keyword,
+                StringComparison.OrdinalIgnoreCase)
+            || item.SalaryCoefficient.ToString(
+                    "0.00",
+                    CultureInfo.InvariantCulture)
+                .Contains(keyword, StringComparison.OrdinalIgnoreCase)
+            || item.SalaryCoefficient.ToString(CultureInfo.CurrentCulture)
+                .Contains(keyword, StringComparison.OrdinalIgnoreCase)
+            || FormatMoney(item.SalaryAmount).Contains(
+                keyword,
+                StringComparison.OrdinalIgnoreCase)
+            || item.SalaryAmount.ToString(CultureInfo.CurrentCulture)
+                .Contains(keyword, StringComparison.OrdinalIgnoreCase);
     }
 
     private void UpdatePage()

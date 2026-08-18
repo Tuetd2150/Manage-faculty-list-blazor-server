@@ -1,6 +1,7 @@
 using System.Globalization;
 using Manage_faculty_list_task02.Models;
 using Microsoft.AspNetCore.Components;
+using Microsoft.FluentUI.AspNetCore.Components;
 
 namespace Manage_faculty_list_task02.Components.Dialogs;
 
@@ -44,6 +45,9 @@ public partial class FacultyDialog
     private LecturerCoefficient? selectedCoefficient;
     private AcademicRank? selectedAcademicRank;
     private Degree? selectedDegree;
+    private IEnumerable<LecturerCoefficient> selectedCoefficientOptions = [];
+    private IEnumerable<AcademicRank> selectedAcademicRankOptions = [];
+    private IEnumerable<Degree> selectedDegreeOptions = [];
     private int initializedId = -1;
     private FacultyDialogMode initializedMode;
     private string? emailError;
@@ -97,6 +101,11 @@ public partial class FacultyDialog
                 item => item.Id == editModel.AcademicRankId) ?? noAcademicRank;
             selectedDegree = Degrees.FirstOrDefault(
                 item => item.Id == editModel.DegreeId) ?? noDegree;
+            selectedCoefficientOptions = selectedCoefficient is null
+                ? []
+                : [selectedCoefficient];
+            selectedAcademicRankOptions = [selectedAcademicRank];
+            selectedDegreeOptions = [selectedDegree];
             initializedId = Model.Id;
             initializedMode = Mode;
             emailError = null;
@@ -110,11 +119,13 @@ public partial class FacultyDialog
 
     private void SynchronizeCoefficient()
     {
+        selectedCoefficient = selectedCoefficientOptions.FirstOrDefault();
         editModel.LecturerCoefficientId = selectedCoefficient?.Id ?? 0;
     }
 
     private void SynchronizeAcademicRank()
     {
+        selectedAcademicRank = selectedAcademicRankOptions.FirstOrDefault();
         editModel.AcademicRankId =
             selectedAcademicRank?.Id > 0
                 ? selectedAcademicRank.Id
@@ -123,10 +134,34 @@ public partial class FacultyDialog
 
     private void SynchronizeDegree()
     {
+        selectedDegree = selectedDegreeOptions.FirstOrDefault();
         editModel.DegreeId =
             selectedDegree?.Id > 0
                 ? selectedDegree.Id
                 : null;
+    }
+
+    private void SearchCoefficientOptions(
+        OptionsSearchEventArgs<LecturerCoefficient> args)
+    {
+        string searchText = args.Text ?? string.Empty;
+        args.Items = SelectableCoefficients.Where(item =>
+            $"Bậc {item.SalaryGrade} – Hệ số {item.SalaryCoefficient:0.00}"
+                .Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SearchAcademicRankOptions(OptionsSearchEventArgs<AcademicRank> args)
+    {
+        string searchText = args.Text ?? string.Empty;
+        args.Items = AcademicRankOptions.Where(item =>
+            item.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void SearchDegreeOptions(OptionsSearchEventArgs<Degree> args)
+    {
+        string searchText = args.Text ?? string.Empty;
+        args.Items = DegreeOptions.Where(item =>
+            item.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
     }
 
     private async Task SaveAsync()

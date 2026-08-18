@@ -105,35 +105,41 @@
                             </div>
                             <div class="form-field">
                                 <label>Hệ số giảng viên *</label>
-                                <FluentSelect
+                                <FluentAutocomplete
                                     TOption="LecturerCoefficient"
-                                    Items="@SelectableCoefficients"
                                     OptionText="@(item => $"Bậc {item.SalaryGrade} – Hệ số {item.SalaryCoefficient:0.00}")"
-                                    OptionValue="@(item => item.Id.ToString())"
                                     Placeholder="-- Chọn hệ số --"
-                                    @bind-SelectedOption="selectedCoefficient"
-                                    @bind-SelectedOption:after="SynchronizeCoefficient" />
+                                    Position="SelectPosition.Above"
+                                    MaximumOptionsSearch="@LecturerCoefficients.Count"
+                                    MaximumSelectedOptions="1"
+                                    OnOptionsSearch="SearchCoefficientOptions"
+                                    @bind-SelectedOptions="selectedCoefficientOptions"
+                                    @bind-SelectedOptions:after="SynchronizeCoefficient" />
                                 <ValidationMessage For="@(() => editModel.LecturerCoefficientId)" />
                             </div>
                             <div class="form-field">
                                 <label>Học hàm</label>
-                                <FluentSelect
+                                <FluentAutocomplete
                                     TOption="AcademicRank"
-                                    Items="@AcademicRankOptions"
                                     OptionText="@(item => item.Name)"
-                                    OptionValue="@(item => item.Id.ToString())"
-                                    @bind-SelectedOption="selectedAcademicRank"
-                                    @bind-SelectedOption:after="SynchronizeAcademicRank" />
+                                    Position="SelectPosition.Above"
+                                    MaximumOptionsSearch="@(AcademicRanks.Count + 1)"
+                                    MaximumSelectedOptions="1"
+                                    OnOptionsSearch="SearchAcademicRankOptions"
+                                    @bind-SelectedOptions="selectedAcademicRankOptions"
+                                    @bind-SelectedOptions:after="SynchronizeAcademicRank" />
                             </div>
                             <div class="form-field">
                                 <label>Học vị</label>
-                                <FluentSelect
+                                <FluentAutocomplete
                                     TOption="Degree"
-                                    Items="@DegreeOptions"
                                     OptionText="@(item => item.Name)"
-                                    OptionValue="@(item => item.Id.ToString())"
-                                    @bind-SelectedOption="selectedDegree"
-                                    @bind-SelectedOption:after="SynchronizeDegree" />
+                                    Position="SelectPosition.Above"
+                                    MaximumOptionsSearch="@(Degrees.Count + 1)"
+                                    MaximumSelectedOptions="1"
+                                    OnOptionsSearch="SearchDegreeOptions"
+                                    @bind-SelectedOptions="selectedDegreeOptions"
+                                    @bind-SelectedOptions:after="SynchronizeDegree" />
                             </div>
                         </div>
                         <FluentStack

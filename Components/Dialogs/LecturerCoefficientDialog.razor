@@ -45,14 +45,15 @@
                         <div class="form-grid">
                             <div class="form-field">
                                 <label>Bậc lương *</label>
-                                <FluentSelect
+                                <FluentAutocomplete
                                     TOption="int"
-                                    Items="@SalaryGrades"
                                     OptionText="@(grade => $"Bậc {grade}")"
-                                    OptionValue="@(grade => grade.ToString())"
                                     Position="SelectPosition.Below"
-                                    @bind-SelectedOption="editModel.SalaryGrade"
-                                    @bind-SelectedOption:after="UpdateCoefficientForGrade" />
+                                    MaximumOptionsSearch="@SalaryGradeOptions.Count"
+                                    MaximumSelectedOptions="1"
+                                    OnOptionsSearch="SearchSalaryGradeOptions"
+                                    @bind-SelectedOptions="selectedSalaryGrades"
+                                    @bind-SelectedOptions:after="UpdateCoefficientForGrade" />
                                 <ValidationMessage For="@(() => editModel.SalaryGrade)" />
                             </div>
                             <div class="form-field">

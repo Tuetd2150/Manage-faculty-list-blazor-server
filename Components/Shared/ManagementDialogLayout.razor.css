@@ -9,7 +9,7 @@
     --management-field-padding: 12px;
     --management-field-label-height: 20px;
     --management-grid-gap: 16px;
-    --management-select-max-height: 240px;
+    --management-select-max-height: 232px;
     --management-border-color: var(--neutral-stroke-divider-rest);
 }
 
@@ -112,6 +112,7 @@
 .management-dialog-host ::deep .form-field fluent-number-field,
 .management-dialog-host ::deep .form-field fluent-date-picker,
 .management-dialog-host ::deep .form-field fluent-select,
+.management-dialog-host ::deep .form-field fluent-autocomplete,
 .management-dialog-host ::deep .form-field fluent-text-area {
     display: block;
     width: 100%;
@@ -125,6 +126,7 @@
 .management-dialog-host ::deep .form-field fluent-number-field::part(root),
 .management-dialog-host ::deep .form-field fluent-date-picker::part(root),
 .management-dialog-host ::deep .form-field fluent-select::part(control),
+.management-dialog-host ::deep .form-field fluent-autocomplete::part(root),
 .management-dialog-host ::deep .form-field fluent-text-area::part(root) {
     width: 100%;
     min-width: 0;
@@ -134,6 +136,11 @@
 }
 
 .management-dialog-host ::deep .form-field fluent-select::part(listbox) {
+    max-height: var(--management-select-max-height);
+    overflow-y: auto;
+}
+
+.management-dialog-host ::deep .form-field .fluent-autocomplete-multiselect div[role="listbox"] {
     max-height: var(--management-select-max-height);
     overflow-y: auto;
 }
